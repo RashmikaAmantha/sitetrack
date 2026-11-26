@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiteTrack Pro - Site Supervisor</title>
+    
+    <!-- PWA / Install as App Meta Tags -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SiteTrack Pro">
+    
+    <!-- Inline SVG App Icon (No Base64) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230f172a'/%3E%3Cpath d='M120 340h272v44H120z' fill='%23f59e0b'/%3E%3Cpath d='M156 260c0-55 45-100 100-100s100 45 100 100v52H156v-52z' fill='%23fbbf24'/%3E%3Crect x='236' y='132' width='40' height='68' rx='12' fill='%23f59e0b'/%3E%3C/svg%3E">
+    
+    <!-- Dynamic Manifest Placeholder (Populated via JS for GitHub Pages compatibility) -->
+    <link id="pwa-manifest" rel="manifest" href="">
+
+    <!-- Google Fonts: Inter & Noto Sans Sinhala -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Sinhala', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans antialiased pb-24 selection:bg-amber-200">
+
+    <!-- ========================================== -->
+    <!-- TOP STICKY HEADER                          -->
+    <!-- ========================================== -->
+    <header class="sticky top-0 z-30 bg-slate-900 text-white shadow-md">
+        <div class="max-w-xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+            <!-- Brand & Title -->
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center shadow-inner shrink-0">
+                    <!-- Hardhat / Construction SVG Icon -->
+                    <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 17h18M5 17v-3a7 7 0 0114 0v3M12 7V4m-3 3.5V6m6 1.5V6"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold tracking-tight leading-tight">SiteTrack <span class="text-amber-400">Pro</span></h1>
+                    <p class="text-[11px] text-slate-400 font-medium leading-none mt-0.5">Supervisor Logbook</p>
+                </div>
+            </div>
+
+            <!-- Date Picker & Report Button -->
+            <div class="flex items-center gap-2">
+                <input type="date" id="global-date" class="bg-slate-800 text-white text-xs font-semibold px-2.5 py-2 rounded-xl border border-slate-700 focus:outline-none focus:border-amber-400">
+                <button onclick="openReportModal()" class="bg-amber-500 hover:bg-amber-400 active:scale-95 transition text-slate-950 font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>Report</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT CONTAINER                     -->
+    <!-- ========================================== -->
+    <main class="max-w-xl mx-auto px-4 pt-4 space-y-5">
+
+        <!-- ====================================== -->
+        <!-- TAB 1: DASHBOARD (OVERVIEW & QUICK)    -->
+        <!-- ====================================== -->
+        <section id="tab-dash" class="tab-section space-y-5">
+            <!-- Summary KPI Cards -->
+            <div class="grid grid-cols-2 gap-3">
+                <div onclick="switchTab('workers')" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 active:scale-95 transition cursor-pointer">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+                        <span>Workers Today</span>
+                        <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px]">බාස් / ගෝල</span>
+                    </div>
+                    <p id="kpi-workers" class="text-2xl font-extrabold text-slate-900 mt-1.5">0 / 0</p>
+                    <p id="kpi-wage" class="text-xs text-slate-500 mt-0.5 font-medium">Est. Rs. 0</p>
+                </div>
+
+                <div onclick="switchTab('machines')" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 active:scale-95 transition cursor-pointer">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+                        <span>Machines</span>
+                        <span id="kpi-machine-badge" class="text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full text-[10px]">Idle</span>
+                    </div>
+                    <p id="kpi-machine-hours" class="text-2xl font-extrabold text-slate-900 mt-1.5">0h 0m</p>
+                    <p class="text-xs text-slate-500 mt-0.5 font-medium">Logged today</p>
+                </div>
+
+                <div onclick="switchTab('loads')" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 active:scale-95 transition cursor-pointer">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+                        <span>Material Loads</span>
+                        <span class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full text-[10px]">ට්‍රක් / බඩු</span>
+                    </div>
+                    <p id="kpi-loads" class="text-2xl font-extrabold text-slate-900 mt-1.5">0</p>
+                    <p id="kpi-last-load" class="text-xs text-slate-500 mt-0.5 font-medium truncate">No loads yet</p>
+                </div>
+
+                <div onclick="switchTab('cash')" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 active:scale-95 transition cursor-pointer">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+                        <span>Cash in Hand</span>
+                        <span class="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-[10px]">පෙටි කෑෂ්</span>
+                    </div>
+                    <p id="kpi-cash-bal" class="text-2xl font-extrabold text-slate-900 mt-1.5">Rs. 0</p>
+                    <p id="kpi-cash-spent" class="text-xs text-rose-600 mt-0.5 font-medium">Spent today: Rs. 0</p>
+                </div>
+            </div>
+
+            <!-- One-Tap Quick Actions -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">One-Tap Quick Log (ක්ෂණික සටහන්)</h2>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="quickLogLoad('Katagal (කැටගල්)')" class="bg-amber-50 hover:bg-amber-100 active:scale-95 transition border border-amber-200 text-amber-900 font-bold text-xs p-3.5 rounded-xl flex items-center gap-2 text-left">
+                        <span class="text-lg">🧱</span>
+                        <div>
+                            <div class="leading-tight">Katagal Truck</div>
+                            <div class="text-[10px] font-medium text-amber-700">Tap to stamp time</div>
+                        </div>
+                    </button>
+                    <button onclick="quickLogLoad('Sand / Dust (වැලි/ගල්කුඩු)')" class="bg-orange-50 hover:bg-orange-100 active:scale-95 transition border border-orange-200 text-orange-900 font-bold text-xs p-3.5 rounded-xl flex items-center gap-2 text-left">
+                        <span class="text-lg">🚚</span>
+                        <div>
+                            <div class="leading-tight">Sand / Dust</div>
+                            <div class="text-[10px] font-medium text-orange-700">Tap to stamp time</div>
+                        </div>
+                    </button>
+                    <button onclick="toggleQuickBreak()" id="btn-quick-break" class="bg-emerald-50 hover:bg-emerald-100 active:scale-95 transition border border-emerald-200 text-emerald-900 font-bold text-xs p-3.5 rounded-xl flex items-center gap-2 text-left">
+                        <span class="text-lg">☕</span>
+                        <div>
+                            <div id="quick-break-title" class="leading-tight">Start Tea Break</div>
+                            <div id="quick-break-sub" class="text-[10px] font-medium text-emerald-700">ටී ටයිම් පටන් ගන්න</div>
+                        </div>
+                    </button>
+                    <button onclick="switchTab('cash')" class="bg-blue-50 hover:bg-blue-100 active:scale-95 transition border border-blue-200 text-blue-900 font-bold text-xs p-3.5 rounded-xl flex items-center gap-2 text-left">
+                        <span class="text-lg">💸</span>
+                        <div>
+                            <div class="leading-tight">Add Expense</div>
+                            <div class="text-[10px] font-medium text-blue-700">වියදම් / සල්ලි</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Running Machines Banner (if any) -->
+            <div id="dash-active-machines" class="hidden bg-slate-900 text-white p-4 rounded-2xl shadow-md space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                        Running Machines Now
+                    </span>
+                    <button onclick="switchTab('machines')" class="text-xs text-slate-300 underline">Manage</button>
+                </div>
+                <div id="dash-active-machines-list" class="space-y-2"></div>
+            </div>
+
+            <!-- Today's Recent Activity Feed -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">Today's Timeline</h2>
+                    <button onclick="openReportModal()" class="text-xs font-bold text-amber-600">WhatsApp Report &rarr;</button>
+                </div>
+                <div id="dash-timeline" class="space-y-2 text-sm">
+                    <p class="text-slate-400 text-xs text-center py-4">No activity logged for this date yet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================== -->
+        <!-- TAB 2: WORKERS & BREAKS                -->
+        <!-- ====================================== -->
+        <section id="tab-workers" class="tab-section hidden space-y-4">
+            <!-- Add New Worker Card -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <h2 class="text-sm font-bold text-slate-800">Add Worker to Crew (අලුත් කෙනෙක් එක් කරන්න)</h2>
+                <form onsubmit="addWorker(event)" class="grid grid-cols-12 gap-2">
+                    <input type="text" id="worker-name" required placeholder="Name (e.g. Sunil Baas)" class="col-span-6 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                    <select id="worker-role" class="col-span-3 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2.5 text-xs font-semibold focus:outline-none focus:border-amber-500">
+                        <option value="Baas">Baas</option>
+                        <option value="Gola">Gola</option>
+                        <option value="Operator">Operator</option>
+                    </select>
+                    <input type="number" id="worker-rate" placeholder="Wage (Rs)" class="col-span-3 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                    <button type="submit" class="col-span-12 bg-slate-900 hover:bg-slate-800 active:scale-95 transition text-white font-bold text-sm py-2.5 rounded-xl">
+                        + Save to Crew List
+                    </button>
+                </form>
+            </div>
+
+            <!-- Daily Attendance List -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-800">Daily Attendance (පැමිණීම)</h2>
+                    <span id="workers-count-badge" class="text-xs font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full">0 Present</span>
+                </div>
+                <div id="workers-list" class="space-y-2.5">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Tea & Lunch Breaks Log -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-800">Tea &amp; Lunch Breaks (ටී / කෑම වෙලාවල්)</h2>
+                    <button onclick="openBreakModal()" class="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-xl active:scale-95 transition">+ Log Break</button>
+                </div>
+                <div id="breaks-list" class="space-y-2">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================== -->
+        <!-- TAB 3: MACHINES & TIMERS               -->
+        <!-- ====================================== -->
+        <section id="tab-machines" class="tab-section hidden space-y-4">
+            <!-- Add Machine -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <h2 class="text-sm font-bold text-slate-800">Add Machine (මැෂින් එක් කරන්න)</h2>
+                <form onsubmit="addMachine(event)" class="grid grid-cols-12 gap-2">
+                    <input type="text" id="machine-name" required placeholder="Machine (e.g. Motor Grader, JCB)" class="col-span-12 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                    <input type="text" id="machine-plate" placeholder="Number Plate (e.g. WP-KA-1234)" class="col-span-6 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold uppercase focus:outline-none focus:border-amber-500">
+                    <input type="tel" id="machine-phone" placeholder="Driver Phone (07X...)" class="col-span-6 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-amber-500">
+                    <button type="submit" class="col-span-12 bg-slate-900 hover:bg-slate-800 active:scale-95 transition text-white font-bold text-sm py-2.5 rounded-xl">+ Add Machine</button>
+                </form>
+            </div>
+
+            <!-- Live Machine Timers -->
+            <div class="space-y-3" id="machines-timers-list">
+                <!-- Populated via JS -->
+            </div>
+
+            <!-- Completed Machine Logs Today -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-800">Completed Logs (වැඩ කළ වෙලාවල්)</h2>
+                    <button onclick="openManualMachineModal()" class="text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl">+ Manual Entry</button>
+                </div>
+                <div id="machine-logs-list" class="space-y-2">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================== -->
+        <!-- TAB 4: MATERIAL LOADS / TRUCKS         -->
+        <!-- ====================================== -->
+        <section id="tab-loads" class="tab-section hidden space-y-4">
+            <!-- Instant One-Tap Load Buttons -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <h2 class="text-sm font-bold text-slate-800">Instant Truck Stamp (ට්‍රක් ආපු ගමන් ඔබන්න)</h2>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="quickLogLoad('Katagal (කැටගල්)')" class="bg-amber-500 hover:bg-amber-400 active:scale-95 transition text-slate-950 font-bold text-xs py-3.5 px-3 rounded-xl shadow-sm">🧱 Katagal Load</button>
+                    <button onclick="quickLogLoad('Sand (වැලි)')" class="bg-orange-500 hover:bg-orange-400 active:scale-95 transition text-white font-bold text-xs py-3.5 px-3 rounded-xl shadow-sm">🚚 Sand Load</button>
+                    <button onclick="quickLogLoad('Quarry Dust (ගල්කුඩු)')" class="bg-slate-800 hover:bg-slate-700 active:scale-95 transition text-white font-bold text-xs py-3.5 px-3 rounded-xl shadow-sm">🪨 Quarry Dust</button>
+                    <button onclick="quickLogLoad('Cement (සිමෙන්ති)')" class="bg-teal-600 hover:bg-teal-500 active:scale-95 transition text-white font-bold text-xs py-3.5 px-3 rounded-xl shadow-sm">🏗️ Cement</button>
+                </div>
+
+                <!-- Custom Load Form -->
+                <form onsubmit="addCustomLoad(event)" class="pt-3 border-t border-slate-100 grid grid-cols-12 gap-2">
+                    <input type="text" id="load-type" required placeholder="Material (e.g. Kerb Stones)" class="col-span-6 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500">
+                    <input type="text" id="load-qty" placeholder="Qty (e.g. 1000 / 2 Cubes)" class="col-span-6 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500">
+                    <input type="time" id="load-time" class="col-span-5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500">
+                    <input type="text" id="load-note" placeholder="Truck No / Note" class="col-span-7 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500">
+                    <button type="submit" class="col-span-12 bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl active:scale-95 transition">+ Add Detailed Load</button>
+                </form>
+            </div>
+
+            <!-- Loads History for Selected Date -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-800">Today's Deliveries (අද ආපු බඩු)</h2>
+                    <span id="loads-count-badge" class="text-xs font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">0 Loads</span>
+                </div>
+                <div id="loads-list" class="space-y-2.5">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================== -->
+        <!-- TAB 5: PETTY CASH                      -->
+        <!-- ====================================== -->
+        <section id="tab-cash" class="tab-section hidden space-y-4">
+            <!-- Cash Balance Summary -->
+            <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-md">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Cash in Hand (අතේ ඉතිරි)</p>
+                        <p id="cash-overall-balance" class="text-3xl font-extrabold text-amber-400 mt-1">Rs. 0</p>
+                    </div>
+                    <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700">All-Time Bal</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-800 text-xs">
+                    <div>
+                        <span class="text-slate-400 block">Today In (ලැබුණු)</span>
+                        <span id="cash-today-in" class="text-emerald-400 font-bold text-sm">Rs. 0</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Today Out (වියදම්)</span>
+                        <span id="cash-today-out" class="text-rose-400 font-bold text-sm">Rs. 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Transaction Form -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+                    <button type="button" id="cash-btn-out" onclick="setCashType('out')" class="py-2 rounded-lg text-xs font-bold bg-rose-600 text-white shadow-sm transition">Expense (වියදම්)</button>
+                    <button type="button" id="cash-btn-in" onclick="setCashType('in')" class="py-2 rounded-lg text-xs font-bold text-slate-600 transition">Cash In (තාත්තගෙන්)</button>
+                </div>
+
+                <form onsubmit="addCashEntry(event)" class="grid grid-cols-12 gap-2">
+                    <input type="number" id="cash-amount" required min="1" placeholder="Amount (Rs.)" class="col-span-6 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-amber-500">
+                    <select id="cash-category" class="col-span-6 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-amber-500">
+                        <option value="Tea & Food (තේ/කෑම)">Tea &amp; Food (තේ/කෑම)</option>
+                        <option value="Hardware / Items">Hardware / Items</option>
+                        <option value="Fuel / Transport">Fuel / Transport</option>
+                        <option value="Worker Advance">Worker Advance</option>
+                        <option value="From Dad (තාත්තගෙන්)">From Dad (තාත්තගෙන්)</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="cash-note" placeholder="Note (e.g. Morning tea + buns for 8)" class="col-span-12 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-amber-500">
+                    <button type="submit" id="cash-submit-btn" class="col-span-12 bg-rose-600 hover:bg-rose-500 active:scale-95 transition text-white font-bold text-sm py-3 rounded-xl">
+                        Save Expense
+                    </button>
+                </form>
+            </div>
+
+            <!-- Cash Ledger for Selected Date -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                <h2 class="text-sm font-bold text-slate-800">Today's Transactions (අද ගනුදෙනු)</h2>
+                <div id="cash-list" class="space-y-2">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- BOTTOM FIXED NAVIGATION BAR                -->
+    <!-- ========================================== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <div class="max-w-xl mx-auto grid grid-cols-5 px-1 py-1.5">
+            <button onclick="switchTab('dash')" data-tab="dash" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-amber-600 font-bold">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="text-[10px] mt-0.5">Home</span>
+            </button>
+            <button onclick="switchTab('workers')" data-tab="workers" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span class="text-[10px] mt-0.5">Crew</span>
+            </button>
+            <button onclick="switchTab('machines')" data-tab="machines" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-[10px] mt-0.5">Machines</span>
+            </button>
+            <button onclick="switchTab('loads')" data-tab="loads" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                <span class="text-[10px] mt-0.5">Loads</span>
+            </button>
+            <button onclick="switchTab('cash')" data-tab="cash" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                <span class="text-[10px] mt-0.5">Cash</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- MODAL: DAILY REPORT & BACKUP               -->
+    <!-- ========================================== -->
+    <div id="report-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Daily Report &amp; Data Backup</h3>
+                    <p id="report-date-label" class="text-xs text-slate-500 font-medium"></p>
+                </div>
+                <button onclick="closeModal('report-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold">&times;</button>
+            </div>
+
+            <!-- WhatsApp Formatted Report -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-600 uppercase">WhatsApp Report Preview (තාත්තට යවන්න)</label>
+                <textarea id="whatsapp-report-text" rows="10" readonly class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs font-mono text-slate-800 focus:outline-none"></textarea>
+                <button onclick="copyWhatsAppReport()" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 shadow-sm">
+                    <span>📋 Copy WhatsApp Report</span>
+                </button>
+            </div>
+
+            <!-- Data Backup & Restore (Safe Storage) -->
+            <div class="pt-3 border-t border-slate-100 space-y-2.5">
+                <p class="text-xs font-bold text-slate-600 uppercase">Backup &amp; Restore (ඩේටා ආරක්ෂාව)</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="downloadBackupJSON()" class="bg-slate-900 text-white font-bold text-xs py-2.5 px-3 rounded-xl active:scale-95 transition">⬇️ Download Backup</button>
+                    <label class="bg-slate-100 text-slate-800 font-bold text-xs py-2.5 px-3 rounded-xl text-center cursor-pointer active:scale-95 transition border border-slate-200">
+                        ⬆️ Restore Backup
+                        <input type="file" accept=".json" onchange="restoreBackupJSON(event)" class="hidden">
+                    </label>
+                </div>
+                <p class="text-[11px] text-slate-400 text-center">Tip: Download a backup JSON once a week to keep months of data 100% safe.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: MANUAL BREAK ENTRY                  -->
+    <!-- ========================================== -->
+    <div id="break-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900">Log Tea / Lunch Break</h3>
+                <button onclick="closeModal('break-modal')" class="w-8 h-8 rounded-full bg-slate-100 font-bold text-slate-600">&times;</button>
+            </div>
+            <form onsubmit="saveManualBreak(event)" class="space-y-3">
+                <select id="break-label" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold">
+                    <option value="Morning Tea (උදේ තේ)">Morning Tea (උදේ තේ)</option>
+                    <option value="Lunch Break (දවල් කෑම)">Lunch Break (දවල් කෑම)</option>
+                    <option value="Evening Tea (හවස තේ)">Evening Tea (හවස තේ)</option>
+                </select>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500">Start Time</label>
+                        <input type="time" id="break-start" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm mt-1">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500">End Time</label>
+                        <input type="time" id="break-end" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm mt-1">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold text-sm py-3 rounded-xl">Save Break</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: MANUAL MACHINE ENTRY                -->
+    <!-- ========================================== -->
+    <div id="manual-machine-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900">Manual Machine Log</h3>
+                <button onclick="closeModal('manual-machine-modal')" class="w-8 h-8 rounded-full bg-slate-100 font-bold text-slate-600">&times;</button>
+            </div>
+            <form onsubmit="saveManualMachineLog(event)" class="space-y-3">
+                <input type="text" id="mm-name" required placeholder="Machine Name (e.g. Motor Grader)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="mm-plate" placeholder="Plate No (e.g. KA-1234)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs uppercase">
+                    <input type="tel" id="mm-phone" placeholder="Driver Phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500">Start Time</label>
+                        <input type="time" id="mm-start" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm mt-1">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500">End Time</label>
+                        <input type="time" id="mm-end" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm mt-1">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500">Start Meter</label>
+                        <input type="text" id="mm-meter-start" placeholder="e.g. 1240.5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs mt-1">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500">End Meter</label>
+                        <input type="text" id="mm-meter-end" placeholder="e.g. 1245.0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs mt-1">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl p-2 text-center cursor-pointer text-[11px] font-bold text-slate-700">
+                        <span id="mm-photo-start-label">📷 Start Meter Photo</span>
+                        <input type="file" id="mm-photo-start" accept="image/*" capture="environment" onchange="document.getElementById('mm-photo-start-label').textContent = this.files.length ? '✅ Start Photo Ready' : '📷 Start Meter Photo'" class="hidden">
+                    </label>
+                    <label class="bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl p-2 text-center cursor-pointer text-[11px] font-bold text-slate-700">
+                        <span id="mm-photo-end-label">📷 End Meter Photo</span>
+                        <input type="file" id="mm-photo-end" accept="image/*" capture="environment" onchange="document.getElementById('mm-photo-end-label').textContent = this.files.length ? '✅ End Photo Ready' : '📷 End Meter Photo'" class="hidden">
+                    </label>
+                </div>
+                <input type="text" id="mm-note" placeholder="Note (Optional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm">
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold text-sm py-3 rounded-xl">Save Log</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: PHOTO VIEWER (METER PHOTOS)         -->
+    <!-- ========================================== -->
+    <div id="photo-viewer-modal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 w-full max-w-md rounded-3xl p-4 space-y-3 shadow-2xl border border-slate-800">
+            <div class="flex items-center justify-between text-white">
+                <h3 id="photo-viewer-title" class="text-sm font-bold truncate pr-2">Meter Photo</h3>
+                <button onclick="closePhotoViewer()" class="w-8 h-8 rounded-full bg-slate-800 font-bold text-slate-300">&times;</button>
+            </div>
+            <div class="bg-black rounded-2xl overflow-hidden flex items-center justify-center min-h-[220px]">
+                <img id="photo-viewer-img" src="" alt="Meter Reading Photo" class="max-w-full max-h-[65vh] object-contain">
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CUSTOM CONFIRMATION DIALOG (NO confirm())  -->
+    <!-- ========================================== -->
+    <div id="confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xs rounded-3xl p-5 space-y-4 shadow-2xl text-center">
+            <h3 class="text-base font-bold text-slate-900">Are you sure?</h3>
+            <p id="confirm-message" class="text-xs text-slate-600"></p>
+            <div class="grid grid-cols-2 gap-2.5">
+                <button onclick="closeModal('confirm-modal')" class="bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Cancel</button>
+                <button id="confirm-yes-btn" class="bg-rose-600 text-white font-bold text-xs py-2.5 rounded-xl">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TOAST NOTIFICATION                         -->
+    <!-- ========================================== -->
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg border border-slate-700 transition-all">
+        Saved!
+    </div>
+
+    <!-- ========================================== -->
+    <!-- APPLICATION LOGIC (JAVASCRIPT)             -->
+    <!-- ========================================== -->
+    <script>
+        // ==========================================
+        // 1.5 INDEXEDDB PHOTO STORAGE (NO BASE64)
+        // ==========================================
+        const PHOTO_DB_NAME = 'SiteTrackPhotosDB';
+        const PHOTO_STORE = 'photos';
+        let currentPhotoObjectUrl = null;
+
+        function openPhotoDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(PHOTO_DB_NAME, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(PHOTO_STORE)) {
+                        db.createObjectStore(PHOTO_STORE, { keyPath: 'id' });
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        function compressImageToBlob(file, maxWidth = 900, quality = 0.72) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const tempUrl = URL.createObjectURL(file);
+                img.onload = () => {
+                    URL.revokeObjectURL(tempUrl);
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxWidth) {
+                        h = Math.round((h * maxWidth) / w);
+                        w = maxWidth;
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    canvas.toBlob((blob) => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('Compression failed'));
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = () => {
+                    URL.revokeObjectURL(tempUrl);
+                    reject(new Error('Image load failed'));
+                };
+                img.src = tempUrl;
+            });
+        }
+
+        async function savePhotoFile(file) {
+            const blob = await compressImageToBlob(file);
+            const db = await openPhotoDB();
+            const photoId = 'ph_' + uid();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(PHOTO_STORE, 'readwrite');
+                tx.objectStore(PHOTO_STORE).put({ id: photoId, blob });
+                tx.oncomplete = () => resolve(photoId);
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function viewPhoto(photoId, title) {
+            if (!photoId) return;
+            try {
+                const db = await openPhotoDB();
+                const tx = db.transaction(PHOTO_STORE, 'readonly');
+                const req = tx.objectStore(PHOTO_STORE).get(photoId);
+                req.onsuccess = () => {
+                    const record = req.result;
+                    if (!record || !record.blob) {
+                        showToast('Photo not found on this device.');
+                        return;
+                    }
+                    if (currentPhotoObjectUrl) URL.revokeObjectURL(currentPhotoObjectUrl);
+                    currentPhotoObjectUrl = URL.createObjectURL(record.blob);
+                    document.getElementById('photo-viewer-title').textContent = title || 'Meter Photo';
+                    document.getElementById('photo-viewer-img').src = currentPhotoObjectUrl;
+                    openModal('photo-viewer-modal');
+                };
+            } catch (err) {
+                console.error(err);
+                showToast('Could not load photo.');
+            }
+        }
+
+        function closePhotoViewer() {
+            closeModal('photo-viewer-modal');
+            if (currentPhotoObjectUrl) {
+                URL.revokeObjectURL(currentPhotoObjectUrl);
+                currentPhotoObjectUrl = null;
+            }
+        }
+
+        // ==========================================
+        // 2. STATE & LOCALSTORAGE MANAGEMENT
+        // ==========================================
+        const STORAGE_KEY = 'sitetrack_pro_data_v1';
+        let currentCashType = 'out';
+        let selectedDate = getTodayStr();
+        let activeBreakStart = null; // In-memory or persisted quick break tracker
+
+        // Default initial data structure
+        let appData = {
+            workersMaster: [
+                { id: 'w1', name: 'Head Baas (ප්‍රධාන බාස්)', role: 'Baas', rate: 4000 }
+            ],
+            machinesMaster: [
+                { id: 'm0', name: 'Motor Grader (මෝටර් ග්‍රේඩරේ)', plate: '', phone: '' },
+                { id: 'm1', name: 'JCB', plate: '', phone: '' },
+                { id: 'm2', name: 'Plate Compactor', plate: '', phone: '' },
+                { id: 'm3', name: 'Roller', plate: '', phone: '' }
+            ],
+            activeTimers: {}, // { machineId: { startTime, accumulatedMs, status, firstStartStr, startMeter, endMeter, startPhotoId, endPhotoId } }
+            activeQuickBreak: null, // { startStr: '10:05' }
+            days: {} // { 'YYYY-MM-DD': { attendance: {}, breaks: [], machineLogs: [], loads: [], cash: [] } }
+        };
+
+        function loadData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    appData = { ...appData, ...parsed };
+                }
+            } catch (e) {
+                console.error('Failed to load localStorage:', e);
+                showToast('Storage error. Using fresh session.');
+            }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            } catch (e) {
+                console.error('Failed to save localStorage:', e);
+                showToast('Warning: Could not save to storage!');
+            }
+        }
+
+        function getDayData(dateStr) {
+            if (!appData.days[dateStr]) {
+                appData.days[dateStr] = {
+                    attendance: {},
+                    breaks: [],
+                    machineLogs: [],
+                    loads: [],
+                    cash: []
+                };
+            }
+            return appData.days[dateStr];
+        }
+
+        // ==========================================
+        // 3. UTILITY HELPERS
+        // ==========================================
+        function getTodayStr() {
+            const d = new Date();
+            const yr = d.getFullYear();
+            const mo = String(d.getMonth() + 1).padStart(2, '0');
+            const dy = String(d.getDate()).padStart(2, '0');
+            return `${yr}-${mo}-${dy}`;
+        }
+
+        function getCurrentTimeStr() {
+            const d = new Date();
+            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function formatDuration(mins) {
+            const h = Math.floor(mins / 60);
+            const m = Math.round(mins % 60);
+            return `${h}h ${m}m`;
+        }
+
+        function formatLiveMs(ms) {
+            const totalSec = Math.floor(ms / 1000);
+            const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+            const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+            const s = String(totalSec % 60).padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function formatMoney(num) {
+            return 'Rs. ' + Number(num || 0).toLocaleString('en-LK');
+        }
+
+        function uid() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        let toastTimer = null;
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.add('hidden'), 2400);
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function askConfirm(message, onConfirm) {
+            document.getElementById('confirm-message').textContent = message;
+            const yesBtn = document.getElementById('confirm-yes-btn');
+            yesBtn.onclick = () => {
+                onConfirm();
+                closeModal('confirm-modal');
+            };
+            openModal('confirm-modal');
+        }
+
+        // ==========================================
+        // 4. NAVIGATION & TABS
+        // ==========================================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.remove('text-slate-500', 'font-medium');
+                    btn.classList.add('text-amber-600', 'font-bold');
+                } else {
+                    btn.classList.remove('text-amber-600', 'font-bold');
+                    btn.classList.add('text-slate-500', 'font-medium');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderAll();
+        }
+
+        // ==========================================
+        // 5. WORKERS & BREAKS LOGIC
+        // ==========================================
+        function addWorker(e) {
+            e.preventDefault();
+            const name = document.getElementById('worker-name').value.trim();
+            const role = document.getElementById('worker-role').value;
+            const rate = Number(document.getElementById('worker-rate').value) || 0;
+            if (!name) return;
+
+            appData.workersMaster.push({ id: uid(), name, role, rate });
+            saveData();
+            e.target.reset();
+            showToast('Worker added to crew!');
+            renderAll();
+        }
+
+        function setAttendance(workerId, status) {
+            const day = getDayData(selectedDate);
+            if (day.attendance[workerId] === status) {
+                delete day.attendance[workerId];
+            } else {
+                day.attendance[workerId] = status;
+            }
+            saveData();
+            renderAll();
+        }
+
+        function deleteWorker(workerId) {
+            askConfirm('Remove this worker from your permanent crew list?', () => {
+                appData.workersMaster = appData.workersMaster.filter(w => w.id !== workerId);
+                saveData();
+                renderAll();
+                showToast('Worker removed');
+            });
+        }
+
+        function toggleQuickBreak() {
+            const day = getDayData(selectedDate);
+            if (!appData.activeQuickBreak) {
+                appData.activeQuickBreak = { startStr: getCurrentTimeStr() };
+                saveData();
+                showToast('Tea break started at ' + appData.activeQuickBreak.startStr);
+            } else {
+                const endStr = getCurrentTimeStr();
+                day.breaks.push({
+                    id: uid(),
+                    label: 'Tea / Rest Break',
+                    start: appData.activeQuickBreak.startStr,
+                    end: endStr
+                });
+                appData.activeQuickBreak = null;
+                saveData();
+                showToast('Break ended & logged!');
+            }
+            renderAll();
+        }
+
+        function openBreakModal() {
+            const now = getCurrentTimeStr();
+            document.getElementById('break-start').value = now;
+            document.getElementById('break-end').value = now;
+            openModal('break-modal');
+        }
+
+        function saveManualBreak(e) {
+            e.preventDefault();
+            const day = getDayData(selectedDate);
+            day.breaks.push({
+                id: uid(),
+                label: document.getElementById('break-label').value,
+                start: document.getElementById('break-start').value,
+                end: document.getElementById('break-end').value
+            });
+            saveData();
+            closeModal('break-modal');
+            showToast('Break logged!');
+            renderAll();
+        }
+
+        function deleteBreak(id) {
+            const day = getDayData(selectedDate);
+            day.breaks = day.breaks.filter(b => b.id !== id);
+            saveData();
+            renderAll();
+        }
+
+        // ==========================================
+        // 6. MACHINES & LIVE TIMERS LOGIC
+        // ==========================================
+        function addMachine(e) {
+            e.preventDefault();
+            const name = document.getElementById('machine-name').value.trim();
+            const plate = document.getElementById('machine-plate').value.trim().toUpperCase();
+            const phone = document.getElementById('machine-phone').value.trim();
+            if (!name) return;
+            appData.machinesMaster.unshift({ id: uid(), name, plate, phone });
+            saveData();
+            e.target.reset();
+            showToast('Machine added!');
+            renderAll();
+        }
+
+        function updateMachineDetails(machineId, field, value) {
+            const m = appData.machinesMaster.find(x => x.id === machineId);
+            if (!m) return;
+            m[field] = field === 'plate' ? value.trim().toUpperCase() : value.trim();
+            saveData();
+        }
+
+        function updateActiveMeterField(machineId, field, value) {
+            if (!appData.activeTimers[machineId]) return;
+            appData.activeTimers[machineId][field] = value.trim();
+            saveData();
+        }
+
+        async function captureMachineMeterPhoto(machineId, type, inputEl) {
+            const file = inputEl.files[0];
+            if (!file) return;
+            try {
+                showToast('Saving meter photo...');
+                const photoId = await savePhotoFile(file);
+                if (!appData.activeTimers[machineId]) {
+                    // Auto-initialize timer state as paused if user takes start meter photo before hitting Start
+                    appData.activeTimers[machineId] = {
+                        startTime: Date.now(),
+                        accumulatedMs: 0,
+                        status: 'paused',
+                        firstStartStr: getCurrentTimeStr(),
+                        startMeter: '',
+                        endMeter: '',
+                        startPhotoId: null,
+                        endPhotoId: null
+                    };
+                }
+                if (type === 'start') {
+                    appData.activeTimers[machineId].startPhotoId = photoId;
+                } else {
+                    appData.activeTimers[machineId].endPhotoId = photoId;
+                }
+                saveData();
+                showToast(type === 'start' ? 'Start meter photo saved!' : 'End meter photo saved!');
+                renderAll();
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to save photo.');
+            }
+            inputEl.value = '';
+        }
+
+        function deleteMachineMaster(id) {
+            askConfirm('Remove this machine from list?', () => {
+                appData.machinesMaster = appData.machinesMaster.filter(m => m.id !== id);
+                delete appData.activeTimers[id];
+                saveData();
+                renderAll();
+            });
+        }
+
+        function startMachineTimer(machineId) {
+            const existing = appData.activeTimers[machineId];
+            if (!existing) {
+                appData.activeTimers[machineId] = {
+                    startTime: Date.now(),
+                    accumulatedMs: 0,
+                    status: 'running',
+                    firstStartStr: getCurrentTimeStr(),
+                    startMeter: '',
+                    endMeter: '',
+                    startPhotoId: null,
+                    endPhotoId: null
+                };
+            } else if (existing.status === 'paused') {
+                existing.startTime = Date.now();
+                existing.status = 'running';
+            }
+            saveData();
+            showToast('Machine timer started');
+            renderAll();
+        }
+
+        function pauseMachineTimer(machineId) {
+            const t = appData.activeTimers[machineId];
+            if (t && t.status === 'running') {
+                t.accumulatedMs += (Date.now() - t.startTime);
+                t.status = 'paused';
+                saveData();
+                showToast('Machine timer paused');
+                renderAll();
+            }
+        }
+
+        function stopMachineTimer(machineId) {
+            const t = appData.activeTimers[machineId];
+            const machine = appData.machinesMaster.find(m => m.id === machineId);
+            if (!t || !machine) return;
+
+            let totalMs = t.accumulatedMs;
+            if (t.status === 'running') {
+                totalMs += (Date.now() - t.startTime);
+            }
+            const totalMins = Math.max(1, Math.round(totalMs / 60000));
+            const day = getDayData(selectedDate);
+            day.machineLogs.unshift({
+                id: uid(),
+                machineName: machine.name,
+                plate: machine.plate || '',
+                phone: machine.phone || '',
+                start: t.firstStartStr,
+                end: getCurrentTimeStr(),
+                durationMins: totalMins,
+                startMeter: t.startMeter || '',
+                endMeter: t.endMeter || '',
+                startPhotoId: t.startPhotoId || null,
+                endPhotoId: t.endPhotoId || null,
+                note: 'Timer Session'
+            });
+            delete appData.activeTimers[machineId];
+            saveData();
+            showToast(`${machine.name} logged (${formatDuration(totalMins)})`);
+            renderAll();
+        }
+
+        function openManualMachineModal() {
+            document.getElementById('mm-start').value = '08:00';
+            document.getElementById('mm-end').value = getCurrentTimeStr();
+            document.getElementById('mm-photo-start-label').textContent = '📷 Start Meter Photo';
+            document.getElementById('mm-photo-end-label').textContent = '📷 End Meter Photo';
+            openModal('manual-machine-modal');
+        }
+
+        async function saveManualMachineLog(e) {
+            e.preventDefault();
+            const name = document.getElementById('mm-name').value.trim();
+            const plate = document.getElementById('mm-plate').value.trim().toUpperCase();
+            const phone = document.getElementById('mm-phone').value.trim();
+            const start = document.getElementById('mm-start').value;
+            const end = document.getElementById('mm-end').value;
+            const startMeter = document.getElementById('mm-meter-start').value.trim();
+            const endMeter = document.getElementById('mm-meter-end').value.trim();
+            const note = document.getElementById('mm-note').value.trim();
+
+            const startPhotoFile = document.getElementById('mm-photo-start').files[0];
+            const endPhotoFile = document.getElementById('mm-photo-end').files[0];
+
+            let startPhotoId = null;
+            let endPhotoId = null;
+            try {
+                if (startPhotoFile) startPhotoId = await savePhotoFile(startPhotoFile);
+                if (endPhotoFile) endPhotoId = await savePhotoFile(endPhotoFile);
+            } catch (err) {
+                console.error(err);
+                showToast('Photo save error, saving log without photo.');
+            }
+
+            const [sh, sm] = start.split(':').map(Number);
+            const [eh, em] = end.split(':').map(Number);
+            let mins = (eh * 60 + em) - (sh * 60 + sm);
+            if (mins < 0) mins += 24 * 60;
+
+            const day = getDayData(selectedDate);
+            day.machineLogs.unshift({
+                id: uid(),
+                machineName: name,
+                plate,
+                phone,
+                start,
+                end,
+                durationMins: Math.max(1, mins),
+                startMeter,
+                endMeter,
+                startPhotoId,
+                endPhotoId,
+                note
+            });
+            saveData();
+            e.target.reset();
+            closeModal('manual-machine-modal');
+            showToast('Machine log saved!');
+            renderAll();
+        }
+
+        function deleteMachineLog(id) {
+            const day = getDayData(selectedDate);
+            day.machineLogs = day.machineLogs.filter(l => l.id !== id);
+            saveData();
+            renderAll();
+        }
+
+        // ==========================================
+        // 7. MATERIAL LOADS / TRUCKS LOGIC
+        // ==========================================
+        function quickLogLoad(typeName) {
+            const day = getDayData(selectedDate);
+            const timeNow = getCurrentTimeStr();
+            day.loads.unshift({
+                id: uid(),
+                type: typeName,
+                qty: '1 Load',
+                time: timeNow,
+                note: ''
+            });
+            saveData();
+            showToast(`Logged: ${typeName} at ${timeNow}`);
+            renderAll();
+        }
+
+        function addCustomLoad(e) {
+            e.preventDefault();
+            const day = getDayData(selectedDate);
+            const type = document.getElementById('load-type').value.trim();
+            const qty = document.getElementById('load-qty').value.trim() || '1 Load';
+            const time = document.getElementById('load-time').value || getCurrentTimeStr();
+            const note = document.getElementById('load-note').value.trim();
+
+            day.loads.unshift({ id: uid(), type, qty, time, note });
+            saveData();
+            e.target.reset();
+            document.getElementById('load-time').value = getCurrentTimeStr();
+            showToast('Delivery logged!');
+            renderAll();
+        }
+
+        function deleteLoad(id) {
+            const day = getDayData(selectedDate);
+            day.loads = day.loads.filter(l => l.id !== id);
+            saveData();
+            renderAll();
+        }
+
+        // ==========================================
+        // 8. PETTY CASH LOGIC
+        // ==========================================
+        function setCashType(type) {
+            currentCashType = type;
+            const btnOut = document.getElementById('cash-btn-out');
+            const btnIn = document.getElementById('cash-btn-in');
+            const submitBtn = document.getElementById('cash-submit-btn');
+            const catSelect = document.getElementById('cash-category');
+
+            if (type === 'out') {
+                btnOut.className = 'py-2 rounded-lg text-xs font-bold bg-rose-600 text-white shadow-sm transition';
+                btnIn.className = 'py-2 rounded-lg text-xs font-bold text-slate-600 transition';
+                submitBtn.className = 'col-span-12 bg-rose-600 hover:bg-rose-500 active:scale-95 transition text-white font-bold text-sm py-3 rounded-xl';
+                submitBtn.textContent = 'Save Expense (වියදම සටහන් කරන්න)';
+                catSelect.value = 'Tea & Food (තේ/කෑම)';
+            } else {
+                btnIn.className = 'py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow-sm transition';
+                btnOut.className = 'py-2 rounded-lg text-xs font-bold text-slate-600 transition';
+                submitBtn.className = 'col-span-12 bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition text-white font-bold text-sm py-3 rounded-xl';
+                submitBtn.textContent = 'Save Cash Received (ලැබුණු මුදල)';
+                catSelect.value = 'From Dad (තාත්තගෙන්)';
+            }
+        }
+
+        function addCashEntry(e) {
+            e.preventDefault();
+            const amount = Number(document.getElementById('cash-amount').value);
+            const category = document.getElementById('cash-category').value;
+            const note = document.getElementById('cash-note').value.trim();
+            if (!amount || amount <= 0) return;
+
+            const day = getDayData(selectedDate);
+            day.cash.unshift({
+                id: uid(),
+                type: currentCashType,
+                category,
+                amount,
+                time: getCurrentTimeStr(),
+                note
+            });
+            saveData();
+            e.target.reset();
+            showToast(currentCashType === 'in' ? 'Cash received saved!' : 'Expense saved!');
+            renderAll();
+        }
+
+        function deleteCashEntry(id) {
+            const day = getDayData(selectedDate);
+            day.cash = day.cash.filter(c => c.id !== id);
+            saveData();
+            renderAll();
+        }
+
+        function getOverallCashBalance() {
+            let bal = 0;
+            Object.values(appData.days).forEach(d => {
+                (d.cash || []).forEach(c => {
+                    bal += (c.type === 'in' ? Number(c.amount) : -Number(c.amount));
+                });
+            });
+            return bal;
+        }
+
+        // ==========================================
+        // 9. REPORTING & BACKUP (WHATSAPP + JSON)
+        // ==========================================
+        function openReportModal() {
+            const day = getDayData(selectedDate);
+            document.getElementById('report-date-label').textContent = `Date: ${selectedDate}`;
+
+            // Attendance summary
+            let presentList = [];
+            let halfList = [];
+            let totalWage = 0;
+            appData.workersMaster.forEach(w => {
+                const st = day.attendance[w.id];
+                if (st === 'present') {
+                    presentList.push(`${w.name} (${w.role})`);
+                    totalWage += Number(w.rate || 0);
+                } else if (st === 'half') {
+                    halfList.push(`${w.name} (Half)`);
+                    totalWage += Number(w.rate || 0) / 2;
+                }
+            });
+
+            // Machines summary
+            const machineLines = day.machineLogs.map(m => {
+                const details = [];
+                if (m.plate) details.push(`Plate: ${m.plate}`);
+                if (m.phone) details.push(`Driver: ${m.phone}`);
+                if (m.startMeter || m.endMeter) details.push(`Meter: ${m.startMeter || '?'} -> ${m.endMeter || '?'}`);
+                const extra = details.length ? `\n  (${details.join(' | ')})` : '';
+                return `• ${m.machineName}: ${m.start} - ${m.end} (${formatDuration(m.durationMins)})${extra}`;
+            });
+            const totalMachineMins = day.machineLogs.reduce((acc, m) => acc + m.durationMins, 0);
+
+            // Loads summary
+            const loadLines = day.loads.map(l => `• ${l.time} - ${l.type} (${l.qty})${l.note ? ' [' + l.note + ']' : ''}`);
+
+            // Breaks summary
+            const breakLines = day.breaks.map(b => `• ${b.label}: ${b.start} - ${b.end}`);
+
+            // Cash summary
+            let todayIn = 0, todayOut = 0;
+            const cashLines = day.cash.map(c => {
+                if (c.type === 'in') todayIn += c.amount;
+                else todayOut += c.amount;
+                return `• [${c.type === 'in' ? '+' : '-'}] Rs.${c.amount.toLocaleString()} - ${c.category}${c.note ? ' (' + c.note + ')' : ''}`;
+            });
+            const overallBal = getOverallCashBalance();
+
+            const report = [
+                `📋 *SITE DAILY REPORT - ${selectedDate}*`,
+                `━━━━━━━━━━━━━━━━━━━━`,
+                `👷 *WORKERS (${presentList.length} Full, ${halfList.length} Half)*`,
+                presentList.length || halfList.length ? [...presentList, ...halfList].map(x => `• ${x}`).join('\n') : '• None logged',
+                `Est. Wages: Rs. ${totalWage.toLocaleString()}`,
+                ``,
+                `🚜 *MACHINES (Total: ${formatDuration(totalMachineMins)})*`,
+                machineLines.length ? machineLines.join('\n') : '• No machine hours',
+                ``,
+                `🚚 *MATERIAL LOADS (${day.loads.length})*`,
+                loadLines.length ? loadLines.join('\n') : '• No loads today',
+                ``,
+                `☕ *BREAKS*`,
+                breakLines.length ? breakLines.join('\n') : '• Standard',
+                ``,
+                `💰 *PETTY CASH*`,
+                `Today In: Rs. ${todayIn.toLocaleString()} | Spent: Rs. ${todayOut.toLocaleString()}`,
+                cashLines.length ? cashLines.join('\n') : '• No transactions',
+                `*Cash Balance in Hand: Rs. ${overallBal.toLocaleString()}*`,
+                `━━━━━━━━━━━━━━━━━━━━`
+            ].join('\n');
+
+            document.getElementById('whatsapp-report-text').value = report;
+            openModal('report-modal');
+        }
+
+        function copyWhatsAppReport() {
+            const textarea = document.getElementById('whatsapp-report-text');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('Report copied! Paste in WhatsApp.');
+            } catch (err) {
+                showToast('Select text & copy manually.');
+            }
+        }
+
+        function downloadBackupJSON() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `SiteTrack_Backup_${getTodayStr()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Backup file downloaded!');
+        }
+
+        function restoreBackupJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && parsed.days && parsed.workersMaster) {
+                        appData = parsed;
+                        saveData();
+                        renderAll();
+                        closeModal('report-modal');
+                        showToast('Backup restored successfully!');
+                    } else {
+                        showToast('Invalid backup file format.');
+                    }
+                } catch (err) {
+                    showToast('Error reading backup file.');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ==========================================
+        // 10. UI RENDERING
+        // ==========================================
+        function renderAll() {
+            const day = getDayData(selectedDate);
+
+            // --- KPIs & Dashboard ---
+            let presentCount = 0, estWage = 0;
+            appData.workersMaster.forEach(w => {
+                const st = day.attendance[w.id];
+                if (st === 'present') { presentCount++; estWage += Number(w.rate || 0); }
+                else if (st === 'half') { presentCount += 0.5; estWage += Number(w.rate || 0) / 2; }
+            });
+            document.getElementById('kpi-workers').textContent = `${presentCount} / ${appData.workersMaster.length}`;
+            document.getElementById('kpi-wage').textContent = `Est. ${formatMoney(estWage)}`;
+
+            const totalMachineMins = day.machineLogs.reduce((sum, l) => sum + l.durationMins, 0);
+            document.getElementById('kpi-machine-hours').textContent = formatDuration(totalMachineMins);
+            const runningCount = Object.values(appData.activeTimers).filter(t => t.status === 'running').length;
+            const mBadge = document.getElementById('kpi-machine-badge');
+            if (runningCount > 0) {
+                mBadge.textContent = `${runningCount} Running`;
+                mBadge.className = 'text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full text-[10px] font-bold';
+            } else {
+                mBadge.textContent = 'Idle';
+                mBadge.className = 'text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full text-[10px]';
+            }
+
+            document.getElementById('kpi-loads').textContent = day.loads.length;
+            document.getElementById('kpi-last-load').textContent = day.loads.length ? `Last: ${day.loads[0].type} (${day.loads[0].time})` : 'No loads yet';
+
+            const overallBal = getOverallCashBalance();
+            let todayIn = 0, todayOut = 0;
+            day.cash.forEach(c => { if (c.type === 'in') todayIn += c.amount; else todayOut += c.amount; });
+            document.getElementById('kpi-cash-bal').textContent = formatMoney(overallBal);
+            document.getElementById('kpi-cash-spent').textContent = `Spent today: ${formatMoney(todayOut)}`;
+
+            // Quick Break Button State
+            const qbBtn = document.getElementById('btn-quick-break');
+            if (appData.activeQuickBreak) {
+                qbBtn.className = 'bg-rose-50 hover:bg-rose-100 active:scale-95 transition border border-rose-300 text-rose-900 font-bold text-xs p-3.5 rounded-xl flex items-center gap-2 text-left';
+                document.getElementById('quick-break-title').textContent = 'End Tea Break';
+                document.getElementById('quick-break-sub').textContent = `Started ${appData.activeQuickBreak.startStr}`;
+            } else {
+                qbBtn.className = 'bg-emerald-50 hover:bg-emerald-100 active:scale-95 transition border border-emerald-200 text-emerald-900 font-bold text-xs p-3.5 rounded-xl flex items-center gap-2 text-left';
+                document.getElementById('quick-break-title').textContent = 'Start Tea Break';
+                document.getElementById('quick-break-sub').textContent = 'ටී ටයිම් පටන් ගන්න';
+            }
+
+            // Dashboard Timeline
+            const timelineItems = [
+                ...day.loads.map(l => ({ time: l.time, text: `🚚 ${l.type} (${l.qty})`, color: 'bg-amber-50 text-amber-900' })),
+                ...day.machineLogs.map(m => ({ time: m.end, text: `🚜 ${m.machineName}: ${formatDuration(m.durationMins)}`, color: 'bg-slate-100 text-slate-800' })),
+                ...day.cash.map(c => ({ time: c.time, text: `💸 ${c.type === 'in' ? '+' : '-'}${formatMoney(c.amount)} (${c.category})`, color: c.type === 'in' ? 'bg-emerald-50 text-emerald-900' : 'bg-rose-50 text-rose-900' })),
+                ...day.breaks.map(b => ({ time: b.start, text: `☕ ${b.label} (${b.start} - ${b.end})`, color: 'bg-blue-50 text-blue-900' }))
+            ].sort((a, b) => (b.time || '').localeCompare(a.time || '')).slice(0, 8);
+
+            const tlContainer = document.getElementById('dash-timeline');
+            if (timelineItems.length === 0) {
+                tlContainer.innerHTML = `<p class="text-slate-400 text-xs text-center py-4">No activity logged for ${selectedDate} yet.</p>`;
+            } else {
+                tlContainer.innerHTML = timelineItems.map(item => `
+                    <div class="flex items-center justify-between px-3 py-2 rounded-xl ${item.color} text-xs font-semibold">
+                        <span class="truncate pr-2">${item.text}</span>
+                        <span class="opacity-70 shrink-0 font-mono">${item.time}</span>
+                    </div>
+                `).join('');
+            }
+
+            // --- TAB 2: WORKERS ---
+            document.getElementById('workers-count-badge').textContent = `${presentCount} Present`;
+            const wList = document.getElementById('workers-list');
+            if (appData.workersMaster.length === 0) {
+                wList.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Add your site workers above.</p>`;
+            } else {
+                wList.innerHTML = appData.workersMaster.map(w => {
+                    const st = day.attendance[w.id] || '';
+                    return `
+                    <div class="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-slate-800 truncate">${w.name}</p>
+                            <p class="text-[11px] text-slate-500 font-medium">${w.role} ${w.rate ? '• ' + formatMoney(w.rate) : ''}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="setAttendance('${w.id}', 'present')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${st === 'present' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600'}">Full</button>
+                            <button onclick="setAttendance('${w.id}', 'half')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${st === 'half' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'bg-white border border-slate-200 text-slate-600'}">Half</button>
+                            <button onclick="deleteWorker('${w.id}')" class="p-1.5 text-slate-400 hover:text-rose-600" title="Delete">&times;</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            const bList = document.getElementById('breaks-list');
+            if (day.breaks.length === 0) {
+                bList.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">No breaks logged today.</p>`;
+            } else {
+                bList.innerHTML = day.breaks.map(b => `
+                    <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-50/70 border border-emerald-100 text-xs">
+                        <div>
+                            <span class="font-bold text-emerald-950">${b.label}</span>
+                            <span class="text-emerald-700 ml-2 font-mono">${b.start} &rarr; ${b.end}</span>
+                        </div>
+                        <button onclick="deleteBreak('${b.id}')" class="text-slate-400 hover:text-rose-600 font-bold px-1">&times;</button>
+                    </div>
+                `).join('');
+            }
+
+            // --- TAB 3: MACHINES ---
+            const mTimersContainer = document.getElementById('machines-timers-list');
+            mTimersContainer.innerHTML = appData.machinesMaster.map(m => {
+                const t = appData.activeTimers[m.id];
+                const isRunning = t && t.status === 'running';
+                const isPaused = t && t.status === 'paused';
+                return `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border ${isRunning ? 'border-amber-400 ring-2 ring-amber-100' : 'border-slate-200/80'} space-y-3">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full shrink-0 ${isRunning ? 'bg-emerald-500 animate-pulse' : isPaused ? 'bg-amber-500' : 'bg-slate-300'}"></span>
+                                <h3 class="text-sm font-extrabold text-slate-900 truncate">${m.name}</h3>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                <input type="text" value="${m.plate || ''}" onchange="updateMachineDetails('${m.id}', 'plate', this.value)" placeholder="Plate No..." class="w-28 bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-bold uppercase text-slate-700 focus:outline-none focus:border-amber-500">
+                                <input type="tel" value="${m.phone || ''}" onchange="updateMachineDetails('${m.id}', 'phone', this.value)" placeholder="Driver No..." class="w-28 bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-700 focus:outline-none focus:border-amber-500">
+                                ${m.phone ? `<a href="tel:${m.phone}" class="bg-emerald-100 text-emerald-800 font-bold text-[11px] px-2 py-1 rounded-lg active:scale-95 transition">📞 Call</a>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span id="timer-display-${m.id}" class="font-mono text-base font-extrabold ${isRunning ? 'text-amber-600' : 'text-slate-600'}">00:00:00</span>
+                            <button onclick="deleteMachineMaster('${m.id}')" class="text-slate-300 hover:text-rose-500 font-bold text-lg leading-none">&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Meter Readings & Photos -->
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70 space-y-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="space-y-1">
+                                <input type="text" value="${(t && t.startMeter) || ''}" oninput="updateActiveMeterField('${m.id}', 'startMeter', this.value)" ${!t ? 'disabled' : ''} placeholder="${t ? 'Start Meter...' : 'Start timer first'}" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-semibold disabled:opacity-50">
+                                <div class="flex gap-1">
+                                    <label class="flex-1 text-center cursor-pointer ${t && t.startPhotoId ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-white text-slate-700 border-slate-200'} border rounded-lg py-1.5 text-[11px] font-bold active:scale-95 transition">
+                                        ${t && t.startPhotoId ? '✅ Start Pic' : '📷 Start Meter'}
+                                        <input type="file" accept="image/*" capture="environment" onchange="captureMachineMeterPhoto('${m.id}', 'start', this)" class="hidden">
+                                    </label>
+                                    ${t && t.startPhotoId ? `<button type="button" onclick="viewPhoto('${t.startPhotoId}', '${m.name} - Start Meter')" class="bg-slate-800 text-white px-2 rounded-lg text-[11px]">👁️</button>` : ''}
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <input type="text" value="${(t && t.endMeter) || ''}" oninput="updateActiveMeterField('${m.id}', 'endMeter', this.value)" ${!t ? 'disabled' : ''} placeholder="${t ? 'End Meter...' : 'End meter'}" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-semibold disabled:opacity-50">
+                                <div class="flex gap-1">
+                                    <label class="flex-1 text-center cursor-pointer ${t && t.endPhotoId ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-white text-slate-700 border-slate-200'} border rounded-lg py-1.5 text-[11px] font-bold active:scale-95 transition">
+                                        ${t && t.endPhotoId ? '✅ End Pic' : '📷 End Meter'}
+                                        <input type="file" accept="image/*" capture="environment" onchange="captureMachineMeterPhoto('${m.id}', 'end', this)" class="hidden">
+                                    </label>
+                                    ${t && t.endPhotoId ? `<button type="button" onclick="viewPhoto('${t.endPhotoId}', '${m.name} - End Meter')" class="bg-slate-800 text-white px-2 rounded-lg text-[11px]">👁️</button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        ${!isRunning ? `<button onclick="startMachineTimer('${m.id}')" class="col-span-${isPaused ? '1' : '3'} bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition text-white font-bold text-xs py-2.5 rounded-xl">${isPaused ? 'Resume' : '▶ Start Timer'}</button>` : ''}
+                        ${isRunning ? `<button onclick="pauseMachineTimer('${m.id}')" class="col-span-1 bg-amber-500 hover:bg-amber-400 active:scale-95 transition text-slate-950 font-bold text-xs py-2.5 rounded-xl">⏸ Pause</button>` : ''}
+                        ${(isRunning || isPaused) ? `<button onclick="stopMachineTimer('${m.id}')" class="col-span-2 bg-rose-600 hover:bg-rose-500 active:scale-95 transition text-white font-bold text-xs py-2.5 rounded-xl">⏹ Stop &amp; Save</button>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+
+            const mLogsList = document.getElementById('machine-logs-list');
+            if (day.machineLogs.length === 0) {
+                mLogsList.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">No machine sessions saved today.</p>`;
+            } else {
+                mLogsList.innerHTML = day.machineLogs.map(l => `
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 text-xs space-y-1.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <p class="font-bold text-slate-800">
+                                    ${l.machineName}
+                                    <span class="text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded ml-1">${formatDuration(l.durationMins)}</span>
+                                </p>
+                                <p class="text-slate-500 font-mono mt-0.5">${l.start} - ${l.end} ${l.note ? '• ' + l.note : ''}</p>
+                            </div>
+                            <button onclick="deleteMachineLog('${l.id}')" class="text-slate-400 hover:text-rose-600 font-bold px-2 py-1">&times;</button>
+                        </div>
+                        ${(l.plate || l.phone || l.startMeter || l.endMeter) ? `
+                        <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-600 pt-1 border-t border-slate-200/60">
+                            ${l.plate ? `<span class="bg-slate-200/80 text-slate-800 font-bold px-1.5 py-0.5 rounded">🔢 ${l.plate}</span>` : ''}
+                            ${l.phone ? `<a href="tel:${l.phone}" class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">📞 ${l.phone}</a>` : ''}
+                            ${(l.startMeter || l.endMeter) ? `<span class="font-mono font-semibold">⏱️ ${l.startMeter || '?'} &rarr; ${l.endMeter || '?'}</span>` : ''}
+                        </div>` : ''}
+                        ${(l.startPhotoId || l.endPhotoId) ? `
+                        <div class="flex gap-2 pt-1">
+                            ${l.startPhotoId ? `<button onclick="viewPhoto('${l.startPhotoId}', '${l.machineName} - Start Meter')" class="bg-slate-800 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg">📷 View Start Meter</button>` : ''}
+                            ${l.endPhotoId ? `<button onclick="viewPhoto('${l.endPhotoId}', '${l.machineName} - End Meter')" class="bg-slate-800 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg">📷 View End Meter</button>` : ''}
+                        </div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            // --- TAB 4: LOADS ---
+            document.getElementById('loads-count-badge').textContent = `${day.loads.length} Loads`;
+            const lList = document.getElementById('loads-list');
+            if (day.loads.length === 0) {
+                lList.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No trucks logged for ${selectedDate}.</p>`;
+            } else {
+                lList.innerHTML = day.loads.map(l => `
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/50 border border-amber-200/60 text-xs">
+                        <div>
+                            <p class="font-bold text-slate-900">${l.type} <span class="text-amber-800 font-semibold">(${l.qty})</span></p>
+                            <p class="text-slate-500 mt-0.5"><span class="font-mono font-bold text-slate-700">${l.time}</span> ${l.note ? '• ' + l.note : ''}</p>
+                        </div>
+                        <button onclick="deleteLoad('${l.id}')" class="text-slate-400 hover:text-rose-600 font-bold px-2 py-1">&times;</button>
+                    </div>
+                `).join('');
+            }
+
+            // --- TAB 5: PETTY CASH ---
+            document.getElementById('cash-overall-balance').textContent = formatMoney(overallBal);
+            document.getElementById('cash-today-in').textContent = formatMoney(todayIn);
+            document.getElementById('cash-today-out').textContent = formatMoney(todayOut);
+
+            const cList = document.getElementById('cash-list');
+            if (day.cash.length === 0) {
+                cList.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No cash entries for ${selectedDate}.</p>`;
+            } else {
+                cList.innerHTML = day.cash.map(c => `
+                    <div class="flex items-center justify-between p-3 rounded-xl ${c.type === 'in' ? 'bg-emerald-50/70 border-emerald-100' : 'bg-rose-50/60 border-rose-100'} border text-xs">
+                        <div class="min-w-0 pr-2">
+                            <p class="font-bold ${c.type === 'in' ? 'text-emerald-900' : 'text-rose-900'}">${c.category}</p>
+                            <p class="text-slate-500 truncate mt-0.5">${c.time} ${c.note ? '• ' + c.note : ''}</p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="font-extrabold text-sm ${c.type === 'in' ? 'text-emerald-700' : 'text-rose-700'}">${c.type === 'in' ? '+' : '-'}${formatMoney(c.amount)}</span>
+                            <button onclick="deleteCashEntry('${c.id}')" class="text-slate-400 hover:text-rose-600 font-bold px-1">&times;</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateLiveTimersUI();
+        }
+
+        // ==========================================
+        // 11. LIVE 1-SECOND TIMER TICKER
+        // ==========================================
+        function updateLiveTimersUI() {
+            const activeIds = Object.keys(appData.activeTimers);
+            const dashBanner = document.getElementById('dash-active-machines');
+            const dashList = document.getElementById('dash-active-machines-list');
+
+            let activeHtml = '';
+            activeIds.forEach(mId => {
+                const t = appData.activeTimers[mId];
+                const m = appData.machinesMaster.find(x => x.id === mId);
+                if (!t || !m) return;
+
+                let elapsed = t.accumulatedMs;
+                if (t.status === 'running') {
+                    elapsed += (Date.now() - t.startTime);
+                }
+                const formatted = formatLiveMs(elapsed);
+                const el = document.getElementById(`timer-display-${mId}`);
+                if (el) el.textContent = formatted;
+
+                activeHtml += `
+                    <div class="flex items-center justify-between bg-slate-800 px-3 py-2 rounded-xl text-xs">
+                        <span class="font-bold text-white">${m.name} <span class="text-[10px] text-slate-400">(${t.status})</span></span>
+                        <span class="font-mono font-extrabold text-amber-400">${formatted}</span>
+                    </div>`;
+            });
+
+            if (activeHtml) {
+                dashBanner.classList.remove('hidden');
+                dashList.innerHTML = activeHtml;
+            } else {
+                dashBanner.classList.add('hidden');
+            }
+        }
+
+        // ==========================================
+        // 12. APP INITIALIZATION
+        // ==========================================
+        window.onload = function () {
+            initPWAManifest();
+            loadData();
+
+            const dateInput = document.getElementById('global-date');
+            dateInput.value = selectedDate;
+            dateInput.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    selectedDate = e.target.value;
+                    renderAll();
+                }
+            });
+
+            document.getElementById('load-time').value = getCurrentTimeStr();
+            setCashType('out');
+            renderAll();
+
+            // Update running machine timers every second
+            setInterval(updateLiveTimersUI, 1000);
+        };
+    </script>
+</body>
+</html>
